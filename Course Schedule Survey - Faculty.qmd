@@ -1,0 +1,608 @@
+---
+title: "Course Schedule Survey"
+subtitle: "Faculty Sample (n = 32) "
+author: "James Van Slyke"
+date: today
+format: 
+  html: 
+    toc: true
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| include: false
+#| message: false
+library(tidyverse)
+library(gt)
+library(readr)
+CS_Faculty <- read_csv("/Users/jamesvanslyke/Library/CloudStorage/GoogleDrive-james.vanslyke@gmail.com/My Drive/Current/FPU/Admin/FPU Admin Projects/Course Schedule Surveys/Data/CS_Faculty.csv")
+```
+
+```{r}
+#| echo: false
+#| include: false
+#| message: false
+#Dataset Cleaning
+#Remove unwanted rows 
+CS_Faculty <- CS_Faculty |>  
+  slice(-c(1, 2, 3))
+
+#Select the columns that you want 
+CS_Faculty <- CS_Faculty |> 
+  select(Q1:Q11)
+```
+
+## What population of students do you primarily teach?
+
+```{r}
+#| echo: false 
+#| message: false
+Data_Summary <- CS_Faculty |> 
+  count(Q1) |> 
+  mutate(Percentage = n /sum(n)*100) 
+
+
+ggplot(Data_Summary, aes(x = Q1, 
+                         y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, hjust = -0.2, size = 4) +
+  theme_minimal() + 
+  coord_flip() + 
+  scale_y_continuous(limits = c(0, 60)) +
+  scale_x_discrete(limits = c("Traditional Undergraduate", "Degree Completion", "Graduate", "Teach in more than one area")) +
+  labs(x ="")
+
+  
+```
+
+## How satisfied are you with the current academic schedule for TUG at Fresno Pacific?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+# Change data
+CS_Faculty |> 
+  mutate(Q2_1 = recode(Q2_1,
+                "1" = "Very unsatisified",
+                "2" = "Somewhat unsatisfied",
+                "3" = "Neutral",
+                "4" = "Somewhat satisfied",
+                "5" = "Very satisfied",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q2_1) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+ggplot( aes(x = Q2_1, 
+                         y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, hjust = -0.2, size = 4) +
+  theme_minimal() + 
+  coord_flip() +
+  scale_x_discrete(limits = c( "Very unsatisified",
+                "Somewhat unsatisfied",
+                "Neutral",
+                "Somewhat satisfied",
+                "Very satisfied",
+                "No opinion")) +
+  labs(x ="") +
+  scale_y_continuous(limits = c(0, 40))
+
+
+```
+
+## How satisfied are you with the current academic schedule for Graduate Studies at Fresno Pacific?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q2_2 = recode(Q2_1,
+                "1" = "Very unsatisified",
+                "2" = "Somewhat unsatisfied",
+                "3" = "Neutral",
+                "4" = "Somewhat satisfied",
+                "5" = "Very satisfied",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q2_2) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+ggplot( aes(x = Q2_2, 
+                         y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, hjust = -0.2, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( "Very unsatisified",
+                "Somewhat unsatisfied",
+                "Neutral",
+                "Somewhat satisfied",
+                "Very satisfied",
+                "No opinion")) +
+  labs(x ="") + 
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 40))
+  
+```
+
+## How satisfied are you with the current academic schedule for Degree Completion at Fresno Pacific?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q2_3 = recode(Q2_3,
+                "1" = "Very unsatisified",
+                "2" = "Somewhat unsatisfied",
+                "3" = "Neutral",
+                "4" = "Somewhat satisfied",
+                "5" = "Very satisfied",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q2_3) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+ggplot( aes(x = Q2_3, 
+                         y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, hjust = -0.2, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( "Very unsatisified",
+                "Somewhat unsatisfied",
+                "Neutral",
+                "Somewhat satisfied",
+                "Very satisfied",
+                "No opinion")) +
+  labs(x ="") +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 35))
+
+```
+
+## Based on the previous question, why are you satisfied/dissatisfied with the current schedule? Please provide examples alongside your reasoning if you have them.
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  slice(-c(1, 2)) |> 
+  select(Q16) |> 
+  filter(!is.na(Q16)) |> 
+  rename("Comments" = Q16) |> 
+  gt()
+```
+
+## Do you think that the current TUG schedule meets students' expectations and needs?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q14_1 = recode(Q14_1,
+                "1" = "Strongly disagree",
+                "2" = "Somewhat disagree",
+                "3" = "Neutral",
+                "4" = "Somewhat agree",
+                "5" = "Strongly agree",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q14_1) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q14_1, y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( 
+                  "Strongly disagree",
+                "Somewhat disagree",
+                "Neutral",
+                "Somewhat agree",
+                "Strongly agree",
+                "No opinion"
+                ), guide = guide_axis(n.dodge = 2)) +
+  labs(x ="")
+
+```
+
+## Do you think that the current Graduate studies schedule meets students' expectations and needs?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q14_2 = recode(Q14_2,
+                "1" = "Strongly disagree",
+                "2" = "Somewhat disagree",
+                "3" = "Neutral",
+                "4" = "Somewhat agree",
+                "5" = "Strongly agree",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q14_2) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q14_2, y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( 
+                  "Strongly disagree",
+                "Somewhat disagree",
+                "Neutral",
+                "Somewhat agree",
+                "Strongly agree",
+                "No opinion"
+                ), guide = guide_axis(n.dodge = 2)) +
+  labs(x ="")
+```
+
+## Do you think that the current Degree Completion schedule meets students' expectations and needs?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q14_3 = recode(Q14_3,
+                "1" = "Strongly disagree",
+                "2" = "Somewhat disagree",
+                "3" = "Neutral",
+                "4" = "Somewhat agree",
+                "5" = "Strongly agree",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q14_3) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q14_3, y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( 
+                  "Strongly disagree",
+                "Somewhat disagree",
+                "Neutral",
+                "Somewhat agree",
+                "Strongly agree",
+                "No opinion"
+                ), guide = guide_axis(n.dodge = 2)) +
+  labs(x ="")
+```
+
+## For TUG students, is the current course schedule consistent for meeting the needs of students from semester to semester?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q15_1 = recode(Q15_1,
+                "1" = "Strongly disagree",
+                "2" = "Somewhat disagree",
+                "3" = "Neutral",
+                "4" = "Somewhat agree",
+                "5" = "Strongly agree",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q15_1) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q15_1, y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( 
+                  "Strongly disagree",
+                "Somewhat disagree",
+                "Neutral",
+                "Somewhat agree",
+                "Strongly agree",
+                "No opinion"
+                ), guide = guide_axis(n.dodge = 2)) +
+  labs(x ="")
+```
+
+## For Graduate students, is the current course schedule consistent for meeting the needs of students from semester to semester?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q15_2 = recode(Q15_2,
+                "1" = "Strongly disagree",
+                "2" = "Somewhat disagree",
+                "3" = "Neutral",
+                "4" = "Somewhat agree",
+                "5" = "Strongly agree",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q15_2) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q15_2, y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( 
+                  "Strongly disagree",
+                "Somewhat disagree",
+                "Neutral",
+                "Somewhat agree",
+                "Strongly agree",
+                "No opinion"
+                ), guide = guide_axis(n.dodge = 2)) +
+  labs(x ="")
+```
+
+## For Degree Completion students, is the current course schedule consistent for meeting the needs of students from semester to semester?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  mutate(Q15_3 = recode(Q15_3,
+                "1" = "Strongly disagree",
+                "2" = "Somewhat disagree",
+                "3" = "Neutral",
+                "4" = "Somewhat agree",
+                "5" = "Strongly agree",
+                "6" = "No opinion"
+                       )) |> 
+    count(Q15_3) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q15_3, y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( 
+                  "Strongly disagree",
+                "Somewhat disagree",
+                "Neutral",
+                "Somewhat agree",
+                "Strongly agree",
+                "No opinion"
+                ), guide = guide_axis(n.dodge = 2)) +
+  labs(x ="")
+```
+
+## For TUG faculty, how open are you to the implementation of a more flexible course schedule (e.g., hybrid courses, online courses, long-form courses offered once per week, etc.)?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+Data_Summary <- CS_Faculty |> 
+  count(Q5) |> 
+  mutate(Percentage = n /sum(n)*100) 
+
+
+ggplot(Data_Summary, aes(x = Q5, 
+                         y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, hjust = -0.2, size = 4) +
+  theme_minimal() + 
+  coord_flip() + 
+  scale_y_continuous(limits = c(0, 65)) +
+  scale_x_discrete(limits = c("Very open", "Somewhat open", "Neutral", "Somewhat opposed", "Very opposed", "Does not apply")) +
+  labs(x ="")
+```
+
+## Based on the previous question, why are you open/not open to implementing these kinds of courses? Or, if you are open, what are your concerns?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  slice(-c(1, 2)) |> 
+  select(Q17) |> 
+  filter(!is.na(Q17)) |> 
+  rename("Comments" = Q17) |> 
+  gt() |> 
+  tab_options(
+    table.width = pct(100), 
+    table.align = "center", 
+    data_row.padding = px(5)
+  ) |> 
+  tab_style(
+    style = cell_text(whitespace = "normal"), 
+    locations = cells_body(columns = everything())
+  )
+```
+
+## For TUG faculty, would you be open to teaching earlier in the day if it meant finishing earlier in the day? Starting at 7:45AM to finish by 3:00PM, for example.
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+Data_Summary <- CS_Faculty |> 
+  count(Q7) |> 
+  mutate(Percentage = n /sum(n)*100) 
+
+
+ggplot(Data_Summary, aes(x = Q7, 
+                         y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, hjust = -0.2, size = 4) +
+  theme_minimal() + 
+  coord_flip() + 
+  scale_y_continuous(limits = c(0, 40)) +
+  scale_x_discrete(limits = c("Very open", "Somewhat open", "Neutral", "Somewhat opposed", "Very opposed", "Does not apply")) +
+  labs(x ="")
+```
+
+## Based on your answer from the previous question, please explain why you selected the option that you did.
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  slice(-c(1, 2)) |> 
+  select(Q6) |> 
+  filter(!is.na(Q6)) |> 
+  rename("Comments" = Q6) |> 
+  gt() |> 
+  tab_options(
+    table.width = pct(100), 
+    table.align = "center", 
+    data_row.padding = px(5)
+  ) |> 
+  tab_style(
+    style = cell_text(whitespace = "normal"), 
+    locations = cells_body(columns = everything())
+  )
+```
+
+## There are currently 3 options for modifying the Course Schedule. Option 1 is based on a primarily Monday through Thursday schedule and Option 2 (a and b) is based on a Monday through Friday Schedule. Please read through the details of the schedule [here](https://github.com/jvanster/jvanster.github.io/raw/refs/heads/main/Course%20Schedule%20Change%20Proposal%2009.10.2024.docx) and select which one you like best.   
+
+```{r}
+#| echo: false 
+#| message: false
+Data_Summary <- CS_Faculty |> 
+  drop_na(Q13) |> 
+  count(Q13) |> 
+  mutate(Percentage = n /sum(n)*100) 
+
+
+ggplot(Data_Summary, aes(x = Q13, 
+                         y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, hjust = -0.2, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c("Option 1", "Option 2 a", "Option 2 b")) +
+  labs(x ="")
+```
+
+## A substantial change to the current academic schedule would significantly affect my work (e.g. ability to balance teaching, research and writing, and personal commitments).
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+    count(Q8) |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q8, y = Percentage)) +
+  geom_bar(stat = "identity", 
+           fill = "cornflowerblue") +
+  geom_text(aes(label = paste0(round(Percentage, 
+    1), "%")), vjust = -0.5, size = 4) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c( 
+                  "Strongly disagree",
+                "Somewhat disagree",
+                "Neutral",
+                "Somewhat agree",
+                "Strongly agree",
+                "No opinion"
+                ), guide = guide_axis(n.dodge = 2)) +
+  labs(x ="")
+```
+
+## Based on your answer from the previous question, please explain why you selected the option that you did.
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  slice(-c(1, 2)) |> 
+  select(Q9) |> 
+  filter(!is.na(Q9)) |> 
+  rename("Comments" = Q9) |> 
+  gt() |> 
+  tab_options(
+    table.width = pct(100), 
+    table.align = "center", 
+    data_row.padding = px(5)
+  ) |> 
+  tab_style(
+    style = cell_text(whitespace = "normal"), 
+    locations = cells_body(columns = everything())
+  )
+```
+
+## Please rank your concern (0 = not concerned, 10 = very concerned) regarding potential changes to the academic schedule in the different categories below.
+
+```{r}
+#| echo: false
+#| message: false
+CS_Faculty |> 
+  select(Q10_1:Q10_5) |> 
+  slice(-c(1, 2)) |> 
+  rename("Impact on students" = Q10_1,
+         "Disruption of research activities" = Q10_2,
+         "Scheduling conflicts with other departments" = Q10_3,
+         "Scheduling conflicts with other personal commitments"
+         = Q10_4, 
+         "Implementation of the new schedule" = Q10_5) |> 
+  drop_na() |> 
+  pivot_longer(cols = everything(), 
+               names_to = "variable", values_to = "value") |> 
+  mutate(value = as.numeric(value)) |> 
+  group_by(variable) |> 
+  summarize(n = n(),
+            mean = mean(value),
+            sd = sd(value),
+            se = sd / sqrt(n),
+            ci = qt(0.975, df = n - 1) * sd / sqrt(n)) |> 
+  ggplot( aes(x = variable,
+              y = mean)) +
+  theme_minimal() +
+  geom_bar(stat = "identity", fill="cornflowerblue") +
+  coord_flip() +
+  labs(x = "Area of Concern", y = "Mean Level of Concern")
+```
+
+## Are there any other concerns you'd like to share?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Faculty |> 
+  slice(-c(1, 2)) |> 
+  select(Q11) |> 
+  filter(!is.na(Q11)) |> 
+  rename("Comments" = Q11) |> 
+  gt() |> 
+  tab_options(
+    table.width = pct(100), 
+    table.align = "center", 
+    data_row.padding = px(5)
+  ) |> 
+  tab_style(
+    style = cell_text(whitespace = "normal"), 
+    locations = cells_body(columns = everything())
+  )
+```
