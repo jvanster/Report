@@ -1,0 +1,270 @@
+---
+title: "Course Schedule Survey - Groups"
+subtitle: "Student Sample (n = 288) "
+author: "James Van Slyke"
+date: today
+format: 
+  html:
+    toc: true
+    toc-location: left
+    toc-expand: true
+    toc-depth: 3
+editor: visual
+---
+
+```{r}
+#| echo: false
+#| include: false
+#| message: false
+library(tidyverse)
+library(gt)
+library(readr)
+CS_Student <- read_csv("/Users/jamesvanslyke/Library/CloudStorage/GoogleDrive-james.vanslyke@gmail.com/My Drive/Current/FPU/Admin/FPU Admin Projects/Course Schedule Surveys/Data/CS_Student.csv")
+
+#Dataset Cleaning
+#Remove unwanted rows 
+CS_Student <- CS_Student %>% 
+  slice(-c(1, 2))
+
+#Select the columns that you want 
+CS_Student <- CS_Student |> 
+  select(Q16:Q12)
+
+#Remove NAs
+# Remove rows where column 'A' has NA
+CS_Student <- CS_Student |>  
+  filter(!is.na(Q16))
+
+```
+
+## Athletes vs. Non-athletes
+
+### Hybrid courses are courses in which you meet in-person and online, usually alternating days. Given the opportunity, would you be interested in taking hybrid courses?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Student |> 
+  mutate(Q7 = case_when(
+    Q7 == "Yes" ~ "Athlete",
+    Q7 == "No" ~ "Non-Athlete")) |> 
+  group_by(Q7) |> 
+  count(Q10) |> 
+  drop_na() |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q10, y = Percentage, fill = Q7)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")),
+            position = position_dodge(width = 0.9), vjust = -0.5) +
+  theme_minimal() + 
+    scale_x_discrete(limits = c("Definitely not", "Probably not", "Might or might not", "Probably yes", "Definitely yes" )) +
+  labs(x ="", fill = "Student Sample")
+```
+
+### For online classes, do you prefer that they have a zoom component or that it's completely asynchronous?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Student |> 
+  mutate(Q7 = case_when(
+    Q7 == "Yes" ~ "Athlete",
+    Q7 == "No" ~ "Non-Athlete")) |> 
+  group_by(Q7) |> 
+  count(Q15) |> 
+  drop_na() |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q15, y = Percentage, fill = Q7)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")),
+            position = position_dodge(width = 0.9), vjust = -0.5) +
+  theme_minimal() + 
+  labs(x ="", fill = "Student Sample")
+```
+
+### Rank your preferences from 0 to 10 for the following types of courses
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+CS_Student |> 
+  select(Q7, Q19_1:Q19_3) |> 
+  drop_na() |> 
+  rename(Athlete = Q7, 
+         Hybrid = Q19_1,
+         Online = Q19_2,
+         In_person = Q19_3) |> 
+  mutate(Athlete = case_when(
+    Athlete == "Yes" ~ "Athlete",
+    Athlete == "No" ~ "Non-Athlete")) |> 
+  pivot_longer(cols = c(Hybrid, Online, In_person), 
+               names_to = "Class", 
+               values_to = "Preference") |> 
+  mutate(Preference = as.numeric(Preference)) |> 
+  group_by(Athlete, Class) |> 
+  summarize(n = n(),
+            mean = mean(Preference),
+            sd = sd(Preference),
+            se = sd / sqrt(n),
+            ci = qt(0.975, df = n - 1) * sd / sqrt(n)) |> 
+  ggplot( aes(x = Class,
+              y = mean, fill = Athlete)) +
+  theme_minimal() +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  geom_errorbar(aes(ymin=mean-ci,
+                    ymax=mean+ci), 
+                position = position_dodge(0.7), width = 0.2) +
+  labs(y = "Mean Preference", x = "Type of Class") +
+  scale_x_discrete(limits = c("In_person", "Online", "Hybrid"))
+```
+
+## Commuting vs. On campus Students
+
+### Hybrid courses are courses in which you meet in-person and online, usually alternating days. Given the opportunity, would you be interested in taking hybrid courses?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Student |> 
+  group_by(Q2) |> 
+  count(Q10) |> 
+  drop_na() |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q10, y = Percentage, fill = Q2)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")),
+            position = position_dodge(width = 0.9), vjust = -0.5) +
+  theme_minimal() + 
+  scale_x_discrete(limits = c("Definitely not", "Probably not", "Might or might not", "Probably yes", "Definitely yes" )) +
+  labs(x ="", fill = "Type of Student")
+```
+
+### For online classes, do you prefer that they have a zoom component or that it's completely asynchronous?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Student |> 
+  group_by(Q2) |> 
+  count(Q15) |> 
+  drop_na() |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q15, y = Percentage, fill = Q2)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")),
+            position = position_dodge(width = 0.9), vjust = -0.5) +
+  theme_minimal() + 
+  labs(x ="", fill = "Type of Student")
+```
+
+### Rank your preferences from 0 to 10 for the following types of courses
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+CS_Student |> 
+  select(Q2, Q19_1:Q19_3) |> 
+  drop_na() |> 
+  rename(Hybrid = Q19_1,
+         Online = Q19_2,
+         In_person = Q19_3) |> 
+  pivot_longer(cols = c(Hybrid, Online, In_person), 
+               names_to = "Class", 
+               values_to = "Preference") |> 
+  mutate(Preference = as.numeric(Preference)) |>
+  group_by(Q2, Class) |> 
+  summarize(n = n(),
+            mean = mean(Preference),
+            sd = sd(Preference),
+            se = sd / sqrt(n),
+            ci = qt(0.975, df = n - 1) * sd / sqrt(n)) |> 
+  ggplot( aes(x = Class,
+              y = mean, fill = Q2)) +
+  theme_minimal() +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  geom_errorbar(aes(ymin=mean-ci,
+                    ymax=mean+ci), 
+                position = position_dodge(0.7), width = 0.2) +
+  labs(y = "Mean Preference", x = "Type of Class", fill = "Type of Student") +
+  scale_x_discrete(limits = c("In_person", "Online", "Hybrid"))
+```
+
+## On campus vs. Off campus jobs
+
+### Hybrid courses are courses in which you meet in-person and online, usually alternating days. Given the opportunity, would you be interested in taking hybrid courses?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Student |> 
+  group_by(Q13) |> 
+  count(Q10) |> 
+  drop_na() |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q10, y = Percentage, fill = Q13)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")),
+            position = position_dodge(width = 0.9), vjust = -0.5) +
+  theme_minimal() + 
+    scale_x_discrete(limits = c("Definitely not", "Probably not", "Might or might not", "Probably yes", "Definitely yes" )) +
+  labs(x ="", fill = "Student Job")
+```
+
+### For online classes, do you prefer that they have a zoom component or that it's completely asynchronous?
+
+```{r}
+#| echo: false 
+#| message: false
+#| warning: false
+CS_Student |> 
+  group_by(Q13) |> 
+  count(Q15) |> 
+  drop_na() |> 
+  mutate(Percentage = n /sum(n)*100) |> 
+  ggplot( aes(x = Q15, y = Percentage, fill = Q13)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = paste0(round(Percentage, 1), "%")),
+            position = position_dodge(width = 0.9), vjust = -0.5) +
+  theme_minimal() + 
+  labs(x ="", fill = "Student Job")
+```
+
+### Rank your preferences from 0 to 10 for the following types of courses
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+CS_Student |> 
+  select(Q13, Q19_1:Q19_3) |> 
+  drop_na() |> 
+  rename(Hybrid = Q19_1,
+         Online = Q19_2,
+         In_person = Q19_3) |> 
+  pivot_longer(cols = c(Hybrid, Online, In_person), 
+               names_to = "Class", 
+               values_to = "Preference") |> 
+  mutate(Preference = as.numeric(Preference)) |>
+  group_by(Q13, Class) |> 
+  summarize(n = n(),
+            mean = mean(Preference),
+            sd = sd(Preference),
+            se = sd / sqrt(n),
+            ci = qt(0.975, df = n - 1) * sd / sqrt(n)) |> 
+  ggplot( aes(x = Class,
+              y = mean, fill = Q13)) +
+  theme_minimal() +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  geom_errorbar(aes(ymin=mean-ci,
+                    ymax=mean+ci), 
+                position = position_dodge(0.7), width = 0.2) +
+  labs(y = "Mean Preference", x = "Type of Class", fill = "Student Job") +
+  scale_x_discrete(limits = c("In_person", "Online", "Hybrid"))
+```
